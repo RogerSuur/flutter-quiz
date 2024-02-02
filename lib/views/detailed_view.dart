@@ -90,7 +90,7 @@ class _DetailedViewState extends State<DetailedView> {
             ),
           if (showAnswer)
             Text(
-              currentQuestion.comment, // Displaying the comment
+              currentQuestion.comment,
               style: const TextStyle(fontSize: 18),
             ),
         ],
