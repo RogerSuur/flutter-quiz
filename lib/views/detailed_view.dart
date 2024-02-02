@@ -1,17 +1,12 @@
-// Shows the questions and options for a selected category.
-
-// Display the category image and a question.
-// True/False buttons for answering.
-// Logic to check if the answer is correct and provide instant feedback (change color, display a message, etc.).
-// Navigate to the next question or to ScoreView after the last question.
-
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/category.dart';
+import 'package:quiz_app/models/question.dart';
+import 'package:quiz_app/views/score_view.dart';
 
 class DetailedView extends StatefulWidget {
   final Category category;
 
-  const DetailedView({required this.category});
+  const DetailedView({super.key, required this.category});
 
   @override
   State<DetailedView> createState() => _DetailedViewState();
@@ -21,21 +16,46 @@ class _DetailedViewState extends State<DetailedView> {
   int currentQuestionIndex = 0;
   int score = 0;
 
-  void _answerQuestion(bool answer) {
-    if (widget.category.questions[currentQuestionIndex].answer == answer) {
+  bool? isAnswerCorrect;
+  bool showAnswer = false;
+
+  void _answerQuestion(bool userAnswer) {
+    bool correctAnswer = widget.category.questions[currentQuestionIndex].answer;
+
+    setState(() {
+      isAnswerCorrect = userAnswer == correctAnswer;
+      showAnswer = true;
+    });
+
+    if (isAnswerCorrect!) {
       score++;
     }
-    setState(() {
-      currentQuestionIndex++;
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        currentQuestionIndex++;
+        showAnswer = false;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (currentQuestionIndex >= widget.category.questions.length) {
-      // Quiz completed, navigate to ScoreView
-      // You can also pass the score to ScoreView
+    if (currentQuestionIndex == widget.category.questions.length) {
+      Future.delayed(Duration.zero, () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ScoreView(
+              score: score,
+              totalQuestions: widget.category.questions.length,
+            ),
+          ),
+        );
+      });
+      return Container();
     }
+
+    Question currentQuestion = widget.category.questions[currentQuestionIndex];
 
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +67,7 @@ class _DetailedViewState extends State<DetailedView> {
           Image.asset(widget.category.imageUrl),
           Text(
             widget.category.questions[currentQuestionIndex].question,
-            style: TextStyle(fontSize: 24),
+            style: const TextStyle(fontSize: 24),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -59,7 +79,20 @@ class _DetailedViewState extends State<DetailedView> {
                   onPressed: () => _answerQuestion(false),
                   child: const Text('False')),
             ],
-          )
+          ),
+          if (showAnswer)
+            Text(
+              isAnswerCorrect! ? 'Correct!' : 'Incorrect!',
+              style: TextStyle(
+                color: isAnswerCorrect! ? Colors.green : Colors.red,
+                fontSize: 24,
+              ),
+            ),
+          if (showAnswer)
+            Text(
+              currentQuestion.comment, // Displaying the comment
+              style: const TextStyle(fontSize: 18),
+            ),
         ],
       ),
     );

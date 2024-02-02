@@ -1,8 +1,3 @@
-// //  Displays the main page with category selections.
-//     A GridView to display categories.
-//     Each grid item will have an image and a name (from Category model).
-//     On tapping a category, navigate to DetailedView.
-
 import 'package:flutter/material.dart';
 import 'package:quiz_app/utils/data.dart';
 import 'package:quiz_app/views/detailed_view.dart';
